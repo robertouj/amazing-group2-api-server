@@ -1,10 +1,12 @@
 const db = require("../dbinit");
 
 const getAnimals = (req, res, next) => {
+  console.log("getAnimals");
   db.query("SELECT * FROM animals;")
     .then((data) => res.json(data.rows))
     .catch((err) => next(err));
 };
+
 
 const getAnimal = (req, res, next) => {
   const { id } = req.params;
