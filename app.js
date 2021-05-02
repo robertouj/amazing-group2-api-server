@@ -13,5 +13,4 @@ app.use(errorHandler);
 
 app.listen(9000, () => console.log("listening to port 9000"));
 
-console.log(process.env.PGUSER);
 
