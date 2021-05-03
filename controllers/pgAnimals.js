@@ -4,10 +4,10 @@ const getAnimals = async (req, res, next) => {
   
   const animalQuery = await db.query("SELECT * FROM animals;");
 
-  const animals = [...animalQuery.rows];
-      
-  const thumbnailsQuery = await db.query("SELECT * FROM thumbnails")    
-  
+  const animals = [...animalQuery.rows];  
+
+  const thumbnailsQuery = await db.query("SELECT * FROM thumbnails")  
+
   const thumbnails = [...thumbnailsQuery.rows];
   
   const newAnimals = animals.map(animal => ({
@@ -22,38 +22,27 @@ const getAnimals = async (req, res, next) => {
   res.json(newAnimals);
   //console.log(newAnimals[1]);
 
-  /* db.query("SELECT * FROM animals;")
-    .then((data) => {
-      const animals = [];
-      const thumbnails = [];
-      let newAnimals = [];
-      
-      animals.push(...data.rows);
-
-      db.query("SELECT * FROM thumbnails;")
-        .then((data) => thumbnails.push(...data.rows))
-        .catch((err) => next(err));
-
-      newAnimals = animals.map(animal => ({
-        id: animal.id,      
-        name: animal.name,
-        latinName: animal.latinName,
-        idVideo: animal.idVideo,
-        img: animal.img,
-        thumbnails: thumbnails.filter(thumbnail => thumbnail.animal_id === animal.id)
-      })); 
-      
-      //console.log(newAnimals);
-    })
-    .catch((err) => next(err));*/
 };
 
-const getAnimal = (req, res, next) => {
+//http://localhost:9000/animals/3figy4GBMZIHLgiYcl9WuG
+const getAnimal = async (req, res, next) => {
   const { id } = req.params;
 
-  db.query("SELECT * FROM animals WHERE id=$1;", [id])
-    .then((data) => res.json(data.rows[0]))
-    .catch((err) => next(err));
+  const animalQuery = await db.query("SELECT * FROM animals WHERE id=$1;", [id]);
+  const animal = animalQuery.rows[0];    
+  const thumbnailsQuery = await db.query("SELECT * FROM thumbnails WHERE animal_id=$1;", [id]);   
+  
+  const newAnimal = ({ 
+    id: animal.id, 
+    name: animal.name,
+    latinName: animal.latinName,
+    idVideo: animal.idVideo,
+    img: animal.img,
+    thumbnails: [...thumbnailsQuery.rows]
+
+  });
+  
+  res.json(newAnimal);
 };
 
 const createAnimal = (req, res, next) => {
@@ -95,20 +84,3 @@ module.exports = {
   deleteAnimal,
 };
 
-/*
-animals:
-
-  id
-  name
-  latinName
-  idVideo
-  img
-
-
-thumbnails: 
-  id
-  id_animal
-  url
-  title
-
-*/
