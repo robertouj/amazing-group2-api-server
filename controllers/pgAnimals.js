@@ -1,64 +1,94 @@
 const db = require("../dbinit");
+const ObjectID = require("bson").ObjectID;
 
 const getAnimals = async (req, res, next) => {
-  
-  const animalQuery = await db.query("SELECT * FROM animals;");
+  try {
+    const animalQuery = await db.query("SELECT * FROM animals;");
+    const animals = [...animalQuery.rows];
+    const thumbnailsQuery = await db.query("SELECT * FROM thumbnails");
+    const thumbnails = [...thumbnailsQuery.rows];
 
-  const animals = [...animalQuery.rows];  
+    const newAnimals = animals.map((animal) => ({
+      id: animal.id,
+      name: animal.name,
+      latinName: animal.latinName,
+      idVideo: animal.idVideo,
+      img: animal.img,
+      thumbnails: thumbnails.filter(
+        (thumbnail) => thumbnail.animal_id === animal.id
+      ),
+    }));
 
-  const thumbnailsQuery = await db.query("SELECT * FROM thumbnails")  
-
-  const thumbnails = [...thumbnailsQuery.rows];
-  
-  const newAnimals = animals.map(animal => ({
-    id: animal.id,      
-    name: animal.name,
-    latinName: animal.latinName,
-    idVideo: animal.idVideo,
-    img: animal.img,
-    thumbnails: thumbnails.filter(thumbnail => thumbnail.animal_id === animal.id)
-  }))
- 
-  res.json(newAnimals);
-  //console.log(newAnimals[1]);
-
+    res.json(newAnimals);
+  } catch (err) {
+    next(err);
+  }
 };
 
-//http://localhost:9000/animals/3figy4GBMZIHLgiYcl9WuG
 const getAnimal = async (req, res, next) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  const animalQuery = await db.query("SELECT * FROM animals WHERE id=$1;", [id]);
-  const animal = animalQuery.rows[0];    
-  const thumbnailsQuery = await db.query("SELECT * FROM thumbnails WHERE animal_id=$1;", [id]);   
-  
-  const newAnimal = ({ 
-    id: animal.id, 
-    name: animal.name,
-    latinName: animal.latinName,
-    idVideo: animal.idVideo,
-    img: animal.img,
-    thumbnails: [...thumbnailsQuery.rows]
+    const animalQuery = await db.query("SELECT * FROM animals WHERE id=$1;", [
+      id,
+    ]);
+    const animal = animalQuery.rows[0];
+    const thumbnailsQuery = await db.query(
+      "SELECT * FROM thumbnails WHERE animal_id=$1;",
+      [id]
+    );
 
-  });
-  
-  res.json(newAnimal);
+
+    const newAnimal = {
+      id: animal.id,
+      name: animal.name,
+      latinName: animal.latinName,
+      idVideo: animal.idVideo,
+      img: animal.img,
+      thumbnails: [...thumbnailsQuery.rows],
+    };
+
+    res.json(newAnimal);
+  } catch (err) {
+    next(err);
+  }
 };
 
-const createAnimal = (req, res, next) => {
-  const { name, latinName, idVideo, img } = req.body;
+/* $ curl -d '{"name": "cat", "latinName": "Felis catus", "idVideo": "ylZYirYSiFA", "img" : "//en.wikipedia.org/wiki/Cat#/media/File:Cat_poster_1.jpg", "url" : "//static.wikia.nocoo
+kie.net/jadensadventures/images/3/3c/Garfield_1924-480x360.jpg/revision/latest?cb=20121110075001"  }' -H "Content-Type: application/json" -X POST http://localhost:9000/animals   
+alsnimals:5000/users
+*/
 
-  db.query(
-    "INSERT INTO animals (name, latinName, idVideo, img) values($1, $2, $3, $4)",
-    [name, latinName, idVideo, img]
-  )
-    .then((data) => res.status(201).json(data))
-    .catch((err) => next(err));
+
+const createAnimal = async (req, res, next) => {
+  try {
+    const id = new ObjectID();
+    const { name, latinName, idVideo, img, url } = req.body;
+
+    const animalQuery = await db.query(
+      "INSERT INTO animals (id) VALUES ('asdasdqaqwq');"
+    );
+
+    /* const animalQuery = await db.query(
+      "INSERT INTO animals (id, name, latinName, idVideo, img) VALUES ($1, $2, $3, $4, $5);",
+      [id, name, latinName, idVideo, img]
+    ); */
+    
+    const thumbnailsQuery = await db.query("INSERT INTO thumbnails (url, animal_id) VALUES ($1, $2);",
+      [url, id]
+    );
+    const createdAnimal = [ animalQuery, thumbnailsQuery];
+
+    res.status(201).json(createdAnimal) 
+      
+  } catch (err) {
+    next(err);
+  }
 };
 
 const updateAnimal = (req, res, next) => {
   const { id } = req.params;
-  const { name, latinname, idVideo, img } = req.body;
+  const { name, latinName, idVideo, img } = req.body;
 
   db.query(
     "UPDATE animals SET name=$1, latinName=$2, idVideo=$3, img=$4 WHERE id=$5;",
@@ -83,4 +113,3 @@ module.exports = {
   updateAnimal,
   deleteAnimal,
 };
-
