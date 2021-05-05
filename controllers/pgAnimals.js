@@ -66,7 +66,8 @@ const createAnimal = async (req, res, next) => {
     const { name, latinName, idVideo, img, url } = req.body;
 
     const animalQuery = await db.query(
-      "INSERT INTO animals (id) VALUES ('asdasdqaqwq');"
+      "INSERT INTO animals (id, name, latinName, idVideo, img) VALUES ($1, $2, $3, $4, $5);",
+      [id, name, latinName, idVideo, img]
     );
 
     /* const animalQuery = await db.query(
