@@ -62,7 +62,7 @@ alsnimals:5000/users
 const createAnimal = async (req, res, next) => {
   try {
     const id = new ObjectID();
-    const { name, latinName, idVideo, img, url } = req.body;
+    const { name, latinName, idVideo, img, thumbnails } = req.body;
 
     const animalQuery = await db.query(
       "INSERT INTO animals (id, name, latinName, idVideo, img) VALUES ($1, $2, $3, $4, $5);",
@@ -75,7 +75,7 @@ const createAnimal = async (req, res, next) => {
     ); */
     
     const thumbnailsQuery = await db.query("INSERT INTO thumbnails (url, animal_id) VALUES ($1, $2);",
-      [url, id]
+      [thumbnails, id]
     );
     const createdAnimal = [ animalQuery, thumbnailsQuery];
 
