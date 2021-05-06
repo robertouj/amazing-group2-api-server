@@ -11,8 +11,8 @@ const getAnimals = async (req, res, next) => {
     const newAnimals = animals.map((animal) => ({
       id: animal.id,
       name: animal.name,
-      latinName: animal.latinName,
-      idVideo: animal.idVideo,
+      latinName: animal.latinname,
+      idVideo: animal.idvideo,
       img: animal.img,
       thumbnails: thumbnails.filter(
         (thumbnail) => thumbnail.animal_id === animal.id
@@ -38,12 +38,11 @@ const getAnimal = async (req, res, next) => {
       [id]
     );
 
-
     const newAnimal = {
       id: animal.id,
       name: animal.name,
-      latinName: animal.latinName,
-      idVideo: animal.idVideo,
+      latinName: animal.latinname,
+      idVideo: animal.idvideo,
       img: animal.img,
       thumbnails: [...thumbnailsQuery.rows],
     };
